@@ -35,7 +35,7 @@ The AI is capable of:
    ```
 2. Add your OpenAI API key in a .txt file stored securely on your virtual machine, for example::
    ```bash
-   Exemplo: C:\Projeto\text.txt
+   Exemple: C:\Projeto\text.txt
    ```  
 3. Run the project
   ```bash
@@ -74,8 +74,6 @@ This project was created for educational purposes to explore how generative AI c
 ## 🧑‍💻 Developed by
 Ana Paula Chaves
 Senior Software Engineer in the Investment Division at Itaú Bank
-
-🔗 LinkedIn • GitHub
 
 🔗 [LinkedIn](https://www.linkedin.com/in/anachavesdev/) • [GitHub](https://github.com/AnaBrando)
 
