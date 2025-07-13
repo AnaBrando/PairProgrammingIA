@@ -1,4 +1,6 @@
+using IAPairProgrammer.Data;
 using IAPairProgrammer.Service;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +11,12 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpClient<IOpenAiService, OpenAiService>();
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite("Data Source=chatmemory.db"));
+
+builder.Services.AddScoped<IMemoryService, MemoryService>();
+
 
 var app = builder.Build();
 

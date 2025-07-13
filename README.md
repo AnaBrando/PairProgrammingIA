@@ -62,6 +62,7 @@ The AI is capable of:
 This project was created for educational purposes to explore how generative AI can improve productivity in backend software development using C# and .NET.
 
 ## Future Ideas
+
  Continuous chat with reasoning memory
 
  Web interface to paste code and view suggestions
@@ -69,7 +70,6 @@ This project was created for educational purposes to explore how generative AI c
  Automatic PR comments generation for GitHub repos
 
  Multi-method refactoring suggestions
-
 
 ## 🧑‍💻 Developed by
 Ana Paula Chaves
