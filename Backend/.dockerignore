@@ -1,0 +1,41 @@
+# Build results
+bin/
+obj/
+out/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+
+# Rider / VSCode / Visual Studio / JetBrains
+.idea/
+.vscode/
+*.code-workspace
+
+# Git
+.git/
+.gitignore
+
+# Docker files
+docker-compose.*
+Dockerfile*
+
+# Secrets (adjust as needed)
+*.pfx
+*.key
+*.crt
+*.pem
+**/text.txt
+
+# Logs
+*.log
+
+# Other project-specific stuff
+.env
+*.db

@@ -18,7 +18,6 @@ public class OpenAiService : IOpenAiService
         _memoryService = memoryService;
     }
 
-
     public async Task<RespostaIA> EnviarPromptAsync(string codigo)
     {
         // 🔍 Step 1: Get embedding
@@ -33,106 +32,117 @@ public class OpenAiService : IOpenAiService
             new
             {
                 role = "system",
-                content = "Você é um engenheiro especialista em C#/.NET. Sempre responda com um JSON válido..."
-            }
-        };
+                content = """
+                            You are an expert C# developer acting as a helpful and precise pair programmer.
 
+                            Your goal is to assist the user in improving their .NET code by following best practices in readability, performance, SOLID principles, and testability.
+
+                            When a user sends a code snippet, follow these steps:
+
+                            1. Refactor the Code  
+                            - Apply .NET and C# best practices (e.g. naming, async usage, clean architecture).
+                            - Improve readability, performance, and maintainability.
+
+                            2. Generate Unit Tests  
+                            - Use xUnit or NUnit (default to xUnit unless specified).
+                            - Cover the key logic paths.
+
+                            3. Add XML Documentation  
+                            - Add `///` comments to public methods and classes.
+                            - Summarize the purpose, parameters, and return values.
+
+                            4. Explain Your Reasoning  
+                            - Briefly explain what you changed and why.
+                            - Focus on educational and technical clarity.
+
+                            Always return your output as a well-formatted JSON using the following schema:
+
+                            ```json
+                            {
+                            "refactoredCode": "C# code string here...",
+                            "unitTests": "xUnit code string here...",
+                            "documentation": "XML-commented code string here...",
+                            "explanation": "Explanation string here..."
+                            }
+                          """ 
+        } 
+    };
         foreach (var msg in pastMessages)
-        {
-            messages.Add(new { role = msg.Role, content = msg.Content });
-        }
-
-        messages.Add(new
-        {
-            role = "user",
-            content = $"Analise o código abaixo e retorne um JSON com...\n\nCódigo:\n\n{codigo}"
-        });
-
-        // 🧠 Step 4: Call OpenAI
-        var requestBody = new { model = "gpt-4o", messages, temperature = 0.0 };
-        var json = JsonSerializer.Serialize(requestBody);
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-        _httpClient.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", ObterApiKey());
-
-        var response = await _httpClient.PostAsync("https://api.openai.com/v1/chat/completions", content);
-        response.EnsureSuccessStatusCode();
-        var responseString = await response.Content.ReadAsStringAsync();
-
-        var contentRaw = JsonDocument.Parse(responseString)
-            .RootElement.GetProperty("choices")[0]
-            .GetProperty("message")
-            .GetProperty("content")
-            .GetString();
-
-        var jsonClean = contentRaw.Replace("```json", "").Replace("```", "").Trim();
-        var resultado = JsonSerializer.Deserialize<RespostaIA>(jsonClean);
-
-        // 💾 Step 5: Save memory
-        await _memoryService.SaveMessageAsync("user", codigo, userEmbedding);
-        var assistantEmbedding = await ObterEmbeddingAsync(contentRaw);
-        await _memoryService.SaveMessageAsync("assistant", contentRaw, assistantEmbedding);
-
-        return resultado!;
-    }
-
-    private string? ObterApiKey()
     {
-        var text = File.ReadAllText(@"C:\Projeto\text.txt");
-        return text;
+        messages.Add(new { role = msg.Role, content = msg.Content });
     }
 
-    public async Task<float[]> ObterEmbeddingAsync(string texto)
+    messages.Add(new
     {
-        var requestBody = new
-        {
-            input = texto,
-            model = "text-embedding-3-small"
-        };
+        role = "user",
+        content = $"Analise o código abaixo e retorne um JSON com as seções esperadas.\n\nCódigo:\n\n{codigo}"
+    });
 
-        var json = JsonSerializer.Serialize(requestBody);
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
-            
-        _httpClient.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", ObterApiKey());
+    // 🧠 Step 4: Call OpenAI
+    var requestBody = new { model = "gpt-4o", messages, temperature = 0.0 };
+    var json = JsonSerializer.Serialize(requestBody);
+    var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-        var response = await _httpClient.PostAsync("https://api.openai.com/v1/embeddings", content);
-        response.EnsureSuccessStatusCode();
+    _httpClient.DefaultRequestHeaders.Authorization =
+        new AuthenticationHeaderValue("Bearer", ObterApiKey());
 
-        var responseString = await response.Content.ReadAsStringAsync();
+    var response = await _httpClient.PostAsync("https://api.openai.com/v1/chat/completions", content);
+    response.EnsureSuccessStatusCode();
+    var responseString = await response.Content.ReadAsStringAsync();
 
-        using var doc = JsonDocument.Parse(responseString);
-        var embeddingArray = doc.RootElement
-            .GetProperty("data")[0]
-            .GetProperty("embedding")
-            .EnumerateArray()
-            .Select(e => e.GetSingle())
-            .ToArray();
+    var contentRaw = JsonDocument.Parse(responseString)
+        .RootElement.GetProperty("choices")[0]
+        .GetProperty("message")
+        .GetProperty("content")
+        .GetString();
 
-        return embeddingArray;
-    }
+    var jsonClean = contentRaw
+        .Replace("```json", "")
+        .Replace("```", "")
+        .Trim();
 
-    public async Task DoEmbedding(string userInput)
+    var resultado = JsonSerializer.Deserialize<RespostaIA>(jsonClean);
+
+    // 💾 Step 5: Save memory
+    await _memoryService.SaveMessageAsync("user", codigo, userEmbedding);
+    var assistantEmbedding = await ObterEmbeddingAsync(contentRaw);
+    await _memoryService.SaveMessageAsync("assistant", contentRaw, assistantEmbedding);
+
+    return resultado!;
+}
+
+private string? ObterApiKey()
+{
+    return Environment.GetEnvironmentVariable("OPENAI_API_KEY");
+}
+
+public async Task<float[]> ObterEmbeddingAsync(string texto)
+{
+    var requestBody = new
     {
-        // STEP 1 - Get embedding for the user’s message
-        var vector = await ObterEmbeddingAsync(userInput);
+        input = texto,
+        model = "text-embedding-3-small"
+    };
 
-        // STEP 2 - Search your SQLite messages (e.g., top 3 similar)
-        var pastMessages = await _memoryService.BuscarMensagensSimilares(vector);
+    var json = JsonSerializer.Serialize(requestBody);
+    var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-        // STEP 3 - Build the chat history
-        var messages = new List<object>
-        {
-            new { role = "system", content = "You are a .NET pair programmer..." }
-        };
+    _httpClient.DefaultRequestHeaders.Authorization =
+        new AuthenticationHeaderValue("Bearer", ObterApiKey());
 
-        foreach (var msg in pastMessages)
-        {
-            messages.Add(new { role = msg.Role, content = msg.Content });
-        }
+    var response = await _httpClient.PostAsync("https://api.openai.com/v1/embeddings", content);
+    response.EnsureSuccessStatusCode();
 
-        // Add the new user message
-        messages.Add(new { role = "user", content = userInput });
-    }
+    var responseString = await response.Content.ReadAsStringAsync();
+
+    using var doc = JsonDocument.Parse(responseString);
+    var embeddingArray = doc.RootElement
+        .GetProperty("data")[0]
+        .GetProperty("embedding")
+        .EnumerateArray()
+        .Select(e => e.GetSingle())
+        .ToArray();
+
+    return embeddingArray;
+ }
 }

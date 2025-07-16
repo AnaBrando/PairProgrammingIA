@@ -1,30 +1,36 @@
+# STAGE 1 - BUILD
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copy project files
+# Copia todos os arquivos do projeto
 COPY . .
 
-# Restore dependencies
-RUN dotnet restore
+# Restaura dependências
+RUN dotnet restore IAPairProgrammer.csproj
 
-# ✅ Install EF Core CLI (required for migrations)
+# Instala dotnet-ef para aplicar migrations
 RUN dotnet tool install --global dotnet-ef
 ENV PATH="${PATH}:/root/.dotnet/tools"
-# Ensure the 'data' directory exists
-RUN mkdir -p /src/data
 
-# 👇 Move into project context — make sure your .csproj is in /src
-WORKDIR /src
+# Publica a aplicação
+RUN dotnet publish IAPairProgrammer.csproj -c Release -o /app/publish
 
-# ✅ Apply migrations using EF CLI
-RUN dotnet ef database update
-
-# ✅ Publish app after migration
-RUN dotnet publish -c Release -o /app/publish
-
-# Final runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+# STAGE 2 - FINAL
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS final
 WORKDIR /app
-COPY --from=build /app/publish .
 
-ENTRYPOINT ["dotnet", "IAPairProgrammer.dll"]
+# Copia o código-fonte completo (para rodar migrations)
+COPY --from=build /src /app/src
+
+# Copia a aplicação publicada
+COPY --from=build /app/publish /app/publish
+
+# Copia o entrypoint
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+RUN mkdir -p /app/data
+
+ENTRYPOINT ["/entrypoint.sh"]
+
+EXPOSE 80

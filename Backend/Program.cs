@@ -13,19 +13,22 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddHttpClient<IOpenAiService, OpenAiService>();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite("Data Source=chatmemory.db"));
+   options.UseSqlite("Data Source=/app/data/app.db"));
 
 builder.Services.AddScoped<IMemoryService, MemoryService>();
 
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.ListenAnyIP(80);
+});
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+
+app.UseSwagger();
+app.UseSwaggerUI();
+
 
 app.UseHttpsRedirection();
 

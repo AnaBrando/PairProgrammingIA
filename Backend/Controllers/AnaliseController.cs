@@ -1,6 +1,3 @@
-using IAPairProgrammer.Service;
-using Microsoft.AspNetCore.Mvc;
-
 namespace IAPairProgrammer.Controllers;
 
 [ApiController]
@@ -21,5 +18,22 @@ public class AnaliseController : ControllerBase
         return Ok(new { resposta });
     }
 
+    [HttpGet("inline")]
+   
+    public string AnalisarCodigo([FromQuery] string codigo)
+    {
+        return CompactarCodigo(codigo);
+    }
+
+public static string CompactarCodigo(string codigo)
+{
+    return codigo
+        .Replace("\r\n", " ")  // Para Windows
+        .Replace("\n", " ")    // Para Linux/Mac
+        .Replace("\t", " ")    // Remove tabulação
+        .Replace("\"", "\\\"") // Escapa aspas para JSON
+        .Replace("  ", " ")    // Remove espaços duplos (opcional)
+        .Trim();
+}
 
 }
