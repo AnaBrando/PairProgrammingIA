@@ -44,3 +44,5 @@ node_modules/
 # Others
 *.DS_Store
 Thumbs.db
+**/chatmemory.db
+**/chatmemory
