@@ -1,36 +1,19 @@
-# STAGE 1 - BUILD
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /src
+# Usa a imagem oficial com SDK do .NET
+FROM mcr.microsoft.com/dotnet/sdk:8.0
 
-# Copia todos os arquivos do projeto
-COPY . .
-
-# Restaura dependências
-RUN dotnet restore IAPairProgrammer.csproj
-
-# Instala dotnet-ef para aplicar migrations
-RUN dotnet tool install --global dotnet-ef
-ENV PATH="${PATH}:/root/.dotnet/tools"
-
-# Publica a aplicação
-RUN dotnet publish IAPairProgrammer.csproj -c Release -o /app/publish
-
-# STAGE 2 - FINAL
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS final
+# Define diretório de trabalho
 WORKDIR /app
 
-# Copia o código-fonte completo (para rodar migrations)
-COPY --from=build /src /app/src
+# Copia tudo (incluindo seu .csproj e migrations)
+COPY . .
 
-# Copia a aplicação publicada
-COPY --from=build /app/publish /app/publish
+# Instala o dotnet-ef (compatível com .NET 8)
+RUN dotnet tool install --global dotnet-ef \
+    && export PATH="$PATH:/root/.dotnet/tools" \
+    && echo 'export PATH="$PATH:/root/.dotnet/tools"' >> ~/.bashrc
 
-# Copia o entrypoint
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+# Aponta variável de ambiente para que o ef funcione
+ENV PATH="${PATH}:/root/.dotnet/tools"
 
-RUN mkdir -p /app/data
-
-ENTRYPOINT ["/entrypoint.sh"]
-
-EXPOSE 80
+# Executa as migrations apenas (sem rodar app)
+CMD ["dotnet", "ef", "database", "update", "--project", "./IAPairProgrammer.csproj"]

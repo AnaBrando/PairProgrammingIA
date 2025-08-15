@@ -1,11 +1,11 @@
-﻿version: '3.4'
+﻿version: '3.9'
 
 services:
-  iapairprogrammer:
-    build: .
-    ports:
-      - "8080:80"
+  ef-migrator:
+    image: mcr.microsoft.com/dotnet/sdk:8.0
     volumes:
-      - ./data:/app/data
-    environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - .:/app
+      - ./App_Data:/app/App_Data
+      - .:/app:cached
+    working_dir: /app
+    entrypoint: ["/bin/bash", "/app/entrypoint.sh"]

@@ -1,3 +1,6 @@
+using IAPairProgrammer.Service;
+using Microsoft.AspNetCore.Mvc;
+
 namespace IAPairProgrammer.Controllers;
 
 [ApiController]
@@ -11,29 +14,19 @@ public class AnaliseController : ControllerBase
         _openAiService = openAiService;
     }
 
-    [HttpPost("analisar")]
-    public async Task<IActionResult> AnalisarCodigo([FromBody] CodigoRequest request)
+    [HttpPost("analisar-upload")]
+    public async Task<IActionResult> AnalisarComArquivo([FromForm] IFormFile file, [FromForm] string codigo,
+        [FromForm] string situacao)
     {
-        var resposta = await _openAiService.EnviarPromptAsync(request.Codigo);
+        using var reader = new StreamReader(file.OpenReadStream());
+        var conteudoArquivo = await reader.ReadToEndAsync();
+
+        var codigoCompleto = string.IsNullOrWhiteSpace(codigo)
+            ? conteudoArquivo
+            : $"{situacao}\n\n{conteudoArquivo}\n\n{codigo}";
+
+        var resposta = await _openAiService.EnviarPromptAsync(new CodigoUploadRequest()
+            { Codigo = codigo, Situacao = situacao, File = file });
         return Ok(new { resposta });
     }
-
-    [HttpGet("inline")]
-   
-    public string AnalisarCodigo([FromQuery] string codigo)
-    {
-        return CompactarCodigo(codigo);
-    }
-
-public static string CompactarCodigo(string codigo)
-{
-    return codigo
-        .Replace("\r\n", " ")  // Para Windows
-        .Replace("\n", " ")    // Para Linux/Mac
-        .Replace("\t", " ")    // Remove tabulação
-        .Replace("\"", "\\\"") // Escapa aspas para JSON
-        .Replace("  ", " ")    // Remove espaços duplos (opcional)
-        .Trim();
-}
-
 }

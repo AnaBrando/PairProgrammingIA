@@ -1,9 +1,11 @@
 namespace IAPairProgrammer;
 
-public class CodigoRequest
+public class CodigoUploadRequest
 {
-    public string Codigo { get; set; }
-
+    public IFormFile? File { get; set; }
+    public string? Codigo { get; set; }
+    
+    public string? Situacao { get; set; }
 }
 public class ChatSession
 {
@@ -11,6 +13,8 @@ public class ChatSession
     public string UserId { get; set; }
     public DateTime StartedAt { get; set; } = DateTime.UtcNow;
     public List<ChatMessage> Messages { get; set; }
+    
+    public int? NotaUsuario { get; set; } // 1-5
 }
 
 public class ChatMessage

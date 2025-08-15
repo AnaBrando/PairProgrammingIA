@@ -13,7 +13,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddHttpClient<IOpenAiService, OpenAiService>();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-   options.UseSqlite("Data Source=/app/data/app.db"));
+    options.UseSqlite("Data Source=App_Data/database.db"));
 
 builder.Services.AddScoped<IMemoryService, MemoryService>();
 

@@ -1,18 +1,37 @@
 #!/bin/bash
 set -e
 
+echo "🔥 ENTRYPOINT STARTED"
+echo "🧹 Limpando pastas bin e obj..."
+
+echo "📦 Buildando projeto..."
+
+chmod -R 777 /app/bin
+chmod -R 777 /app/obj
+dotnet build /app/IAPairProgrammer.csproj
+
+echo "📁 Criando diretório de banco se não existir..."
+mkdir -p /app/App_Data
+ls -la /app/App_Data
+
+echo "🔧 Instalando dotnet-ef..."
+dotnet tool install --global dotnet-ef || echo "✅ dotnet-ef já instalado."
+
+# Atualiza o PATH para encontrar o dotnet-ef
 export PATH="$PATH:/root/.dotnet/tools"
 
-echo "🔥 ENTRYPOINT STARTED"
-echo "📁 Criando diretório de banco se não existir..."
-mkdir -p /app/data
-ls -la /app/data
+echo "🧠 Verificando se existe migration..."
+if ! dotnet ef migrations list --project /app/IAPairProgrammer.csproj | grep -q "Create"; then
+  echo "📌 Nenhuma migration encontrada. Criando migration inicial..."
+  dotnet ef migrations add CreateChatMessages --project /app/IAPairProgrammer.csproj
+else
+  echo "✅ Migration já existe."
+fi
 
-echo "Installing dotnet-ef..."
-dotnet tool install --global dotnet-ef
+echo "🛠️ Rodando EF Core database update..."
+dotnet ef database update --project /app/IAPairProgrammer.csproj
 
-echo "Running EF Core migrations..."
-dotnet ef database update --project /app/src/IAPairProgrammer.csproj
+echo "✅ Banco atualizado. Pronto para debug no Rider!"
 
-echo "Starting app..."
-exec dotnet /app/publish/IAPairProgrammer.dll
+# Mantém o container vivo para que o Rider possa acessar
+tail -f /dev/null
