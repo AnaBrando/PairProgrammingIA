@@ -82,13 +82,13 @@ public class PromptBuilder
         return _messages;
     }
     
-    public List<object> ConstruirPrompt(List<ChatMessage> mensagens, string codigo, CodigoUploadRequest request)
+    public List<object> ConstruirPrompt(List<ChatMessage> mensagens, CodigoUploadRequest request)
     {
         return new PromptBuilder()
             .ComPromptSistema()
             .ComSituacao(request.Situacao)
             .ComMensagensAnteriores(mensagens)
-            .ComCodigoDoUsuario(codigo)
+            .ComCodigoDoUsuario(request.Codigo)
             .Build();
     }
 }

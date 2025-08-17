@@ -1,3 +1,4 @@
+using System.Text;
 using IAPairProgrammer.Service;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,18 +16,30 @@ public class AnaliseController : ControllerBase
     }
 
     [HttpPost("analisar-upload")]
-    public async Task<IActionResult> AnalisarComArquivo([FromForm] IFormFile file, [FromForm] string codigo,
+    public async Task<IActionResult> AnalisarComArquivo([FromForm] IFormFile file,
         [FromForm] string situacao)
     {
-        using var reader = new StreamReader(file.OpenReadStream());
+        Console.WriteLine("Requisição recebida!");
+        
+        if (file == null || file.Length == 0)
+            return BadRequest("Arquivo não enviado.");
+
+        using var reader = new StreamReader(file.OpenReadStream(), Encoding.UTF8);
         var conteudoArquivo = await reader.ReadToEndAsync();
 
-        var codigoCompleto = string.IsNullOrWhiteSpace(codigo)
-            ? conteudoArquivo
-            : $"{situacao}\n\n{conteudoArquivo}\n\n{codigo}";
+        var request = new CodigoUploadRequest
+        {
+            Situacao = situacao,
+            Codigo = conteudoArquivo
+        };
 
-        var resposta = await _openAiService.EnviarPromptAsync(new CodigoUploadRequest()
-            { Codigo = codigo, Situacao = situacao, File = file });
-        return Ok(new { resposta });
+        var resposta = await _openAiService.EnviarPromptAsync(request);
+        return Ok(new
+            {
+                refactoredCode = $"```csharp\n{resposta.RefactoredCode}\n```",
+                unitTests = $"```csharp\n{resposta.UnitTests}\n```",
+                documentation = $"```csharp\n{resposta.Documentation}\n```",
+                explanation = resposta.Explanation
+            });
     }
 }

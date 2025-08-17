@@ -31,7 +31,7 @@ public class OpenAiService : IOpenAiService
         var pastMessages = await _memoryService.BuscarMensagensSimilares(userEmbedding);
 
         // 🏗️ 3. Construir prompt com ajuda do PromptBuilder
-        var mensagens = _builder.ConstruirPrompt(pastMessages, request.Situacao,request);
+        var mensagens = _builder.ConstruirPrompt(pastMessages,request);
 
         // 🚀 4. Chamada à OpenAI API
         var resultadoIA = await EnviarParaOpenAiAsync(mensagens);
@@ -76,14 +76,25 @@ public class OpenAiService : IOpenAiService
             .Replace("```json", "")
             .Replace("```", "")
             .Trim();
-
-        var parsed = JsonSerializer.Deserialize<RespostaIA>(jsonClean);
-
-        return new RespostaWrapper
+        try
         {
-            RawContent = rawContent!,
-            Parsed = parsed
-        };
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+            var parsed = JsonSerializer.Deserialize<RespostaIA>(jsonClean, options);
+            return new RespostaWrapper
+            {
+                RawContent = rawContent!,
+                Parsed = parsed
+            };
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+
     }
 
     private string? ObterApiKey()

@@ -2,15 +2,15 @@ using System.Text.Json.Serialization;
 
 public class RespostaIA
 {
-    [JsonPropertyName("melhoria")]
-    public string Melhoria { get; set; }
+    [JsonPropertyName("refactoredCode")]
+    public string RefactoredCode { get; set; }
 
-    [JsonPropertyName("documentacao")]
-    public string Documentacao { get; set; }
+    [JsonPropertyName("unitTests")]
+    public string UnitTests { get; set; }
 
-    [JsonPropertyName("explicacao")]
-    public string Explicacao { get; set; }
+    [JsonPropertyName("documentation")]
+    public string Documentation { get; set; }
 
-    [JsonPropertyName("teste_unitario")]
-    public string TesteUnitario { get; set; }
+    [JsonPropertyName("explanation")]
+    public string Explanation { get; set; }
 }
