@@ -1,0 +1,260 @@
+/* ChatGPT-style modern chat box */
+.app-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  z-index: 9999;
+}
+
+.clippy-icon {
+  width: 80px;
+  height: 80px;
+  cursor: pointer;
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  z-index: 10000;
+}
+
+.chat-box {
+  background-color: #1e1e1e;
+  color: #f4f4f4;
+  width: 340px;
+  border-radius: 12px;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.4);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  animation: fadeInUp 0.3s ease-out;
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  margin: 10px 0;
+  padding-right: 8px;
+  font-family: monospace;
+  white-space: pre-wrap;
+}
+
+
+.msg.bot {
+  background-color: #2e2e2e;
+  padding: 10px;
+  border-radius: 10px;
+  align-self: flex-start;
+  white-space: pre-wrap;
+}
+
+.msg.user {
+  background-color: #007bff;
+  color: white;
+  padding: 10px;
+  border-radius: 10px;
+  align-self: flex-end;
+  white-space: pre-wrap;
+}
+
+.chat-input {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chat-input input[type="text"] {
+  background-color: #2e2e2e;
+  color: #e4e4e4;
+  border: 1px solid #444;
+  padding: 8px;
+  border-radius: 8px;
+  outline: none;
+  font-size: 14px;
+}
+
+.chat-input input[type="file"] {
+  font-size: 13px;
+  color: #ccc;
+}
+
+.chat-input button {
+  background-color: #007bff;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.chat-input button:hover {
+  background-color: #0056b3;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.chat-input input[type="text"] {
+  background-color: #2e2e2e;
+  color: #e4e4e4;
+  border: 1px solid #444;
+  padding: 12px;
+  border-radius: 8px;
+  width: 100%;
+  margin-bottom: 10px;
+  outline: none;
+  font-size: 14px;
+  font-family: 'Segoe UI', sans-serif;
+}
+/* Ajusta o tamanho do ícone */
+.bot-icon {
+  width: 60px;
+  height: 60px;
+  cursor: pointer;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+  transition: transform 0.3s ease-in-out;
+  animation: idleBot 2.5s ease-in-out infinite;
+}
+
+/* Animação "viva" (respiração leve) */
+@keyframes idleBot {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.04) translateY(-2px);
+  }
+}
+.app-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.bot-icon {
+  width: 60px;
+  height: 60px;
+  cursor: pointer;
+}
+
+.chat-box {
+  background-color: #1f1f1f;
+  color: white;
+  width: 400px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.8);
+  padding: 1rem;
+  overflow: hidden;
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  margin: 10px 0;
+  background: #2c2c2c;
+  border-radius: 5px;
+  padding: 10px;
+  font-size: 0.95rem;
+}
+
+.msg {
+  margin-bottom: 15px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+}
+
+.msg.user {
+  background-color: #007bff;
+  color: white;
+  padding: 10px;
+  border-radius: 8px;
+  align-self: flex-end;
+  max-width: 80%;
+}
+
+.msg.bot {
+  background-color: #3a3a3a;
+  color: white;
+  padding: 10px;
+  border-radius: 8px;
+  max-width: 100%;
+  font-family: Consolas, monospace;
+}
+
+.chat-input {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.chat-input input[type=\"text\"] {
+  padding: 8px;
+  font-size: 1rem;
+  border-radius: 5px;
+  border: none;
+  outline: none;
+}
+
+.chat-input input[type=\"file\"] {
+  font-size: 0.9rem;
+  color: white;
+}
+
+.chat-input button {
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  background: #007bff;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.chat-input button:hover {
+  background: #0056b3;
+}
+
+.loading {
+  color: #ffc107;
+  font-weight: bold;
+  text-align: center;
+}
+.chat-messages {
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.msg.bot pre {
+  background-color: #1e1e1e;
+  color: #dcdcdc;
+  padding: 12px;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 14px;
+}
+.welcome {
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.chat-input input[type="text"]::placeholder {
+  color: #aaa;
+}
