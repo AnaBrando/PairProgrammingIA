@@ -52,7 +52,9 @@ ${data.documentation.replace(/^```csharp|```$/g, '')}
 
 ### 📖 Explicação
 ${data.explanation}
-`;
+
+---
+🧙‍♂️ Posso ajudar com mais alguma coisa? Só enviar outro código ou dúvida!`;
 
       setMessages(prev => [
         ...prev.filter(m => m.from !== 'user'),
