@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import './App.css';
 
 function App() {
@@ -32,7 +34,7 @@ function App() {
       }
 
       const data = await res.json();
-      const markdownResult = String.raw`
+      const markdownResult = `
 ### 📘 Código Refatorado
 \`\`\`csharp
 ${data.refactoredCode.replace(/^```csharp|```$/g, '')}
@@ -52,7 +54,10 @@ ${data.documentation.replace(/^```csharp|```$/g, '')}
 ${data.explanation}
 `;
 
-      setMessages(prev => [...prev, { from: 'bot', text: markdownResult }]);
+      setMessages(prev => [
+        ...prev.filter(m => m.from !== 'user'),
+        { from: 'bot', text: markdownResult }
+      ]);
     } catch (err) {
       console.error('🚨 Erro ao enviar dados:', err);
       setMessages(prev => [
@@ -88,36 +93,36 @@ ${data.explanation}
               <div key={i} className={`msg ${msg.from}`}>
                 {msg.from === 'bot' ? (
                   <ReactMarkdown
-                children={msg.text}
-                components={{
-                  code({node, inline, className, children, ...props}) {
-                    const match = /language-(\w+)/.exec(className || '')
-                    return !inline && match ? (
-                      <SyntaxHighlighter
-                        children={String(children).replace(/\n$/, '')}
-                        style={dark}
-                        language={match[1]}
-                        PreTag="div"
-                        {...props}
-                      />
-                    ) : (
-                      <code className={className} {...props}>{children}</code>
-                    )
-                  }
-                }}
-/>
+                    components={{
+                      code({ node, inline, className, children, ...props }) {
+                        const match = /language-(\w+)/.exec(className || '');
+                        return !inline && match ? (
+                          <SyntaxHighlighter
+                            style={oneDark}
+                            language={match[1]}
+                            PreTag="div"
+                            {...props}
+                          >
+                            {String(children).replace(/\n$/, '')}
+                          </SyntaxHighlighter>
+                        ) : (
+                          <code className={className} {...props}>
+                            {children}
+                          </code>
+                        );
+                      },
+                    }}
+                  >
+                    {msg.text}
+                  </ReactMarkdown>
                 ) : (
-                  <span>{msg.text}</span>
+                  <div className="user-bubble">
+                    <span>{msg.text}</span>
+                  </div>
                 )}
               </div>
             ))}
-           {loading && (
-            <div className="loading">
-              ⏳ Pensando<span className="dots">
-                <span>.</span><span>.</span><span>.</span>
-              </span>
-            </div>
-        )}
+            {loading && <div className="loading">⏳ Pensando<span className="dots"></span></div>}
           </div>
 
           <form className="chat-input" onSubmit={(e) => { e.preventDefault(); handleSend(); }}>
